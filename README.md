@@ -11,7 +11,10 @@ every trace and error group working.
 | `node/` | `@formatio/otel-node`, `@formatio/otel-next` |
 | `python/` | `formatio-otel` (imports as `formatio_otel`) |
 
-On Formatio, turn **Tracing** on for the application; the endpoint and token are injected.
+On Formatio, tracing is on for new applications and the endpoint and token are injected. Go
+applications built with Railpack need no SDK: the build compiles the instrumentation in with
+OpenTelemetry's `otelc` and this repository's [`go/otelc`](go/otelc) rules. Install an SDK there
+only to report errors you handle yourself.
 Elsewhere, set the standard OTLP variables from the Tracing card; the SDKs read nothing else:
 
 ```sh
