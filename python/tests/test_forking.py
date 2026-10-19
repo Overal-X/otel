@@ -71,7 +71,7 @@ def assert_every_worker_exports(command, cwd, receiver, port):
     server = subprocess.Popen(
         command,
         cwd=cwd,
-        env=clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"),
+        env=clean_env(OTEL_EXPORTER_OTLP_ENDPOINT=receiver.url, OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer%20t"),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,

@@ -25,8 +25,6 @@ var configEnv = []string{
 	"OTEL_EXPORTER_OTLP_COMPRESSION",
 	"OTEL_EXPORTER_OTLP_TRACES_COMPRESSION",
 	"OTEL_TRACES_SAMPLER",
-	"FORMATIO_ENDPOINT",
-	"FORMATIO_TOKEN",
 }
 
 func clearEnv(t *testing.T) {
@@ -114,9 +112,12 @@ func TestInitExportsOverTheWire(t *testing.T) {
 		wantAuth string
 	}{
 		{
-			name: "formatio shorthands",
+			name: "otel base endpoint with a path",
 			env: func(base string) map[string]string {
-				return map[string]string{"FORMATIO_ENDPOINT": base + "/otlp/", "FORMATIO_TOKEN": "secret"}
+				return map[string]string{
+					"OTEL_EXPORTER_OTLP_ENDPOINT": base + "/otlp/",
+					"OTEL_EXPORTER_OTLP_HEADERS":  "authorization=Bearer%20secret",
+				}
 			},
 			wantPath: "/otlp/v1/traces",
 			wantAuth: "Bearer secret",

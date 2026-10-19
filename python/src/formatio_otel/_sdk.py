@@ -27,8 +27,8 @@ _provider: TracerProvider | None = None
 
 def init(endpoint: str | None = None, token: str | None = None, service_name: str | None = None) -> None:
     """Start exporting traces to Formatio. Safe to call more than once; only the first call
-    counts. Arguments override the OTEL_* and FORMATIO_* environment; `endpoint` is a base URL
-    such as FORMATIO_ENDPOINT, to which /v1/traces is appended."""
+    counts. Arguments override the OTEL_* environment; `endpoint` is a base URL such as
+    OTEL_EXPORTER_OTLP_ENDPOINT, to which /v1/traces is appended."""
     global _initialized
     with _lock:
         if _initialized:

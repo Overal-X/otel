@@ -37,13 +37,13 @@ def test_exports_protobuf_to_the_intake(receiver):
     assert resource["telemetry.distro.version"] == formatio_otel.__version__
 
 
-def test_formatio_shorthands(receiver):
+def test_otel_base_endpoint_and_headers(receiver):
     result = run_python(
         "import formatio_otel\n"
         "formatio_otel.init()\n"
         "formatio_otel.capture_exception(RuntimeError('handled'))\n"
         "assert formatio_otel.flush()\n",
-        clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="tok"),
+        clean_env(OTEL_EXPORTER_OTLP_ENDPOINT=receiver.url, OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer%20tok"),
     )
     assert result.returncode == 0, result.stderr
 

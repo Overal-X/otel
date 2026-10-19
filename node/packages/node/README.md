@@ -10,8 +10,12 @@ npm i @formatio/otel-node
 ## Setup
 
 On Formatio, turn **Tracing** on for the application; the endpoint and token are injected.
-Elsewhere, set `FORMATIO_ENDPOINT` (shown on the Tracing card) and `FORMATIO_TOKEN`. The standard
-`OTEL_EXPORTER_OTLP_*` variables take precedence over both.
+Elsewhere, set the standard OTLP variables from the Tracing card:
+
+```sh
+export OTEL_EXPORTER_OTLP_ENDPOINT='https://your-formatio-host/otlp'
+export OTEL_EXPORTER_OTLP_HEADERS='authorization=Bearer <tracing token>'
+```
 
 **ES modules** — preload the SDK. It must run before your app's `import`s, which are all loaded
 before any of your code runs:

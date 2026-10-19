@@ -28,11 +28,10 @@ are injected as `OTEL_*` variables, and `Init` needs no options. Elsewhere, set:
 
 | Variable | |
 | --- | --- |
-| `FORMATIO_ENDPOINT` | the public endpoint on the Tracing card |
-| `FORMATIO_TOKEN` | the application's tracing token |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | the public endpoint on the Tracing card |
+| `OTEL_EXPORTER_OTLP_HEADERS` | `authorization=Bearer <tracing token>` |
 
-`WithEndpoint`, `WithToken` and `WithServiceName` override everything else; standard
-`OTEL_EXPORTER_OTLP_*` variables win over the `FORMATIO_*` ones. With no endpoint or token,
+`WithEndpoint`, `WithToken` and `WithServiceName` override the environment. With no endpoint or token,
 `Init` prints one warning and the app runs untraced. `OTEL_TRACES_SAMPLER` is respected.
 
 ## Crashes

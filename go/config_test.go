@@ -21,7 +21,6 @@ func TestResolve(t *testing.T) {
 			env: map[string]string{
 				"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "https://traces.example/x",
 				"OTEL_EXPORTER_OTLP_TRACES_HEADERS":  "authorization=Bearer%20env",
-				"FORMATIO_TOKEN":                     "formatio",
 			},
 			wantURL:     "https://opt.example/otlp/v1/traces",
 			wantHeaders: map[string]string{"authorization": "Bearer opt"},
@@ -31,7 +30,6 @@ func TestResolve(t *testing.T) {
 			env: map[string]string{
 				"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "https://traces.example/custom",
 				"OTEL_EXPORTER_OTLP_ENDPOINT":        "https://base.example",
-				"FORMATIO_ENDPOINT":                  "https://formatio.example",
 				"OTEL_EXPORTER_OTLP_TRACES_HEADERS":  "authorization=Bearer%20traces",
 				"OTEL_EXPORTER_OTLP_HEADERS":         "authorization=Bearer%20base",
 			},
@@ -42,41 +40,38 @@ func TestResolve(t *testing.T) {
 			name: "base endpoint gets the traces path once",
 			env: map[string]string{
 				"OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel-intake:4318/",
-				"FORMATIO_ENDPOINT":           "https://formatio.example",
 				"OTEL_EXPORTER_OTLP_HEADERS":  "authorization=Bearer%20base, x-extra = 1 ,bad,=novalue",
-				"FORMATIO_TOKEN":              "formatio",
 			},
 			wantURL:     "http://otel-intake:4318/v1/traces",
 			wantHeaders: map[string]string{"authorization": "Bearer base", "x-extra": "1"},
 		},
 		{
-			name: "formatio shorthands fill what is missing",
-			env: map[string]string{
-				"FORMATIO_ENDPOINT": "https://formatio.example/otlp",
-				"FORMATIO_TOKEN":    "secret",
-			},
-			wantURL:     "https://formatio.example/otlp/v1/traces",
-			wantHeaders: map[string]string{"authorization": "Bearer secret"},
-		},
-		{
 			name: "base already ends in the traces path",
 			env: map[string]string{
-				"FORMATIO_ENDPOINT": "https://formatio.example/otlp/v1/traces/",
-				"FORMATIO_TOKEN":    "secret",
+				"OTEL_EXPORTER_OTLP_ENDPOINT": "https://formatio.example/otlp/v1/traces/",
+				"OTEL_EXPORTER_OTLP_HEADERS":  "authorization=Bearer%20secret",
 			},
 			wantURL:     "https://formatio.example/otlp/v1/traces",
 			wantHeaders: map[string]string{"authorization": "Bearer secret"},
 		},
 		{
 			name:    "no endpoint",
-			env:     map[string]string{"FORMATIO_TOKEN": "secret"},
+			env:     map[string]string{"OTEL_EXPORTER_OTLP_HEADERS": "authorization=Bearer%20secret"},
 			wantErr: errNoEndpoint,
 		},
 		{
 			name:    "no token",
-			env:     map[string]string{"FORMATIO_ENDPOINT": "https://formatio.example"},
+			env:     map[string]string{"OTEL_EXPORTER_OTLP_ENDPOINT": "https://formatio.example"},
 			wantURL: "https://formatio.example/v1/traces",
 			wantErr: errNoToken,
+		},
+		{
+			name: "FORMATIO_* variables are not read",
+			env: map[string]string{
+				"FORMATIO_ENDPOINT": "https://formatio.example/otlp",
+				"FORMATIO_TOKEN":    "secret",
+			},
+			wantErr: errNoEndpoint,
 		},
 	}
 	for _, tt := range tests {

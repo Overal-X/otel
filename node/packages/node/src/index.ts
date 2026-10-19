@@ -12,8 +12,8 @@ export { setupFastifyErrorHandler, type FastifyLike } from "./fastify";
 const DEFAULT_FLUSH_TIMEOUT_MS = 2000;
 
 const MISSING_HINTS = {
-  endpoint: "no endpoint configured (FORMATIO_ENDPOINT or OTEL_EXPORTER_OTLP_ENDPOINT)",
-  token: "no token configured (FORMATIO_TOKEN or an authorization header in OTEL_EXPORTER_OTLP_HEADERS)",
+  endpoint: "no endpoint configured (OTEL_EXPORTER_OTLP_ENDPOINT)",
+  token: "no token configured (an authorization header in OTEL_EXPORTER_OTLP_HEADERS)",
 } as const;
 
 let initialized = false;

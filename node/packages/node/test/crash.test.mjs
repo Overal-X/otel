@@ -9,7 +9,7 @@ after(() => receiver.close());
 function crash(scenario, nodeArgs = []) {
   const run = runNode(
     [...nodeArgs, "crash.cjs", scenario],
-    childEnv({ FORMATIO_ENDPOINT: receiver.url, FORMATIO_TOKEN: "t", OTEL_SERVICE_NAME: `crash-${scenario}-${nodeArgs.join("")}` }),
+    childEnv({ OTEL_EXPORTER_OTLP_ENDPOINT: receiver.url, OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer%20t", OTEL_SERVICE_NAME: `crash-${scenario}-${nodeArgs.join("")}` }),
   );
   return { ...run, service: `crash-${scenario}-${nodeArgs.join("")}` };
 }

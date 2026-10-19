@@ -29,8 +29,8 @@ var warnings io.Writer = os.Stderr
 // which flushes what is still buffered.
 //
 // On Formatio, Init needs no options: the endpoint, token and service name come from the
-// OTEL_* variables injected when Tracing is on. Elsewhere, set FORMATIO_ENDPOINT and
-// FORMATIO_TOKEN. Without an endpoint or token, Init prints one warning to stderr and leaves
+// OTEL_* variables injected when Tracing is on. Elsewhere, set OTEL_EXPORTER_OTLP_ENDPOINT and
+// OTEL_EXPORTER_OTLP_HEADERS. Without an endpoint or token, Init prints one warning to stderr and leaves
 // tracing off, so an unconfigured run still starts; err is non-nil only if the exporter cannot
 // be built.
 func Init(ctx context.Context, opts ...Option) (shutdown func(context.Context) error, err error) {

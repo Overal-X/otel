@@ -12,5 +12,9 @@ every trace and error group working.
 | `python/` | `formatio-otel` (imports as `formatio_otel`) |
 
 On Formatio, turn **Tracing** on for the application; the endpoint and token are injected.
-Elsewhere, set `FORMATIO_ENDPOINT` (the public endpoint on the Tracing card) and
-`FORMATIO_TOKEN`.
+Elsewhere, set the standard OTLP variables from the Tracing card; the SDKs read nothing else:
+
+```sh
+export OTEL_EXPORTER_OTLP_ENDPOINT='https://your-formatio-host/otlp'
+export OTEL_EXPORTER_OTLP_HEADERS='authorization=Bearer <tracing token>'
+```

@@ -11,7 +11,7 @@ def crash_event(span):
 
 def test_uncaught_exception_is_exported_and_the_exit_code_kept(receiver):
     without_sdk = run_python(CRASH, clean_env())
-    with_sdk = run_python("import formatio_otel\nformatio_otel.init()\n" + CRASH, clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"))
+    with_sdk = run_python("import formatio_otel\nformatio_otel.init()\n" + CRASH, clean_env(OTEL_EXPORTER_OTLP_ENDPOINT=receiver.url, OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer%20t"))
 
     assert without_sdk.returncode == with_sdk.returncode == 1
     assert "ValueError: missing DATABASE_URL" in with_sdk.stderr
@@ -38,7 +38,7 @@ def test_thread_crash_is_exported_and_the_thread_hook_chained(receiver):
         "t.start()\n"
         "t.join()\n"
         "print('still running')\n",
-        clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"),
+        clean_env(OTEL_EXPORTER_OTLP_ENDPOINT=receiver.url, OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer%20t"),
     )
 
     assert result.returncode == 0
@@ -55,7 +55,7 @@ def test_previous_excepthook_still_runs(receiver):
         "sys.excepthook = lambda *exc: print('app hook', exc[1])\n"
         "formatio_otel.init()\n"
         "raise SystemError('down')\n",
-        clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"),
+        clean_env(OTEL_EXPORTER_OTLP_ENDPOINT=receiver.url, OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer%20t"),
     )
 
     assert result.returncode == 1

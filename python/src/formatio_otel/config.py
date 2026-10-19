@@ -29,9 +29,9 @@ class Config:
         """Why nothing can be exported, or None. The intake rejects a request without a token,
         so a missing token turns tracing off just like a missing endpoint."""
         if self.endpoint is None:
-            return "no endpoint; set FORMATIO_ENDPOINT or OTEL_EXPORTER_OTLP_ENDPOINT"
+            return "no endpoint; set OTEL_EXPORTER_OTLP_ENDPOINT"
         if not self.headers:
-            return "no token; set FORMATIO_TOKEN or OTEL_EXPORTER_OTLP_HEADERS"
+            return "no token; set an authorization header in OTEL_EXPORTER_OTLP_HEADERS"
         return None
 
 
@@ -41,8 +41,8 @@ def resolve(
     token: str | None = None,
     service_name: str | None = None,
 ) -> Config:
-    """The shared contract: explicit arguments, then standard OTEL_* env, then the FORMATIO_*
-    shorthands. `endpoint` is a base URL like FORMATIO_ENDPOINT."""
+    """The shared contract: explicit arguments, then the standard OTEL_* env. `endpoint` is a
+    base URL like OTEL_EXPORTER_OTLP_ENDPOINT."""
     return Config(_traces_endpoint(env, endpoint), _headers(env, token), service_name or None)
 
 
@@ -60,9 +60,8 @@ def _traces_endpoint(env: Mapping[str, str], endpoint: str | None) -> str | None
         return _join(endpoint)
     if traces := env.get("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"):
         return traces
-    for name in ("OTEL_EXPORTER_OTLP_ENDPOINT", "FORMATIO_ENDPOINT"):
-        if base := env.get(name):
-            return _join(base)
+    if base := env.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
+        return _join(base)
     return None
 
 
@@ -75,8 +74,4 @@ def _headers(env: Mapping[str, str], token: str | None) -> dict[str, str]:
     if token:
         return {"authorization": f"Bearer {token}"}
     raw = env.get("OTEL_EXPORTER_OTLP_TRACES_HEADERS") or env.get("OTEL_EXPORTER_OTLP_HEADERS")
-    if raw:
-        return dict(parse_env_headers(raw, liberal=True))
-    if token := env.get("FORMATIO_TOKEN"):
-        return {"authorization": f"Bearer {token}"}
-    return {}
+    return dict(parse_env_headers(raw, liberal=True)) if raw else {}

@@ -12,11 +12,11 @@ const receiver = await startReceiver();
 after(() => receiver.close());
 
 for (const key of Object.keys(process.env)) {
-  if (key.startsWith("OTEL_") || key.startsWith("FORMATIO_")) delete process.env[key];
+  if (key.startsWith("OTEL_")) delete process.env[key];
 }
 Object.assign(process.env, {
-  FORMATIO_ENDPOINT: receiver.url,
-  FORMATIO_TOKEN: "secret-token",
+  OTEL_EXPORTER_OTLP_ENDPOINT: receiver.url,
+  OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer%20secret-token",
   OTEL_SERVICE_NAME: "wire-test",
   // None of these may change what is exported or start another pipeline.
   OTEL_EXPORTER_OTLP_PROTOCOL: "http/json",

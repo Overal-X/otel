@@ -17,10 +17,15 @@ formatio_otel.init()
 ```
 
 On Formatio, turn **Tracing** on for the application: the endpoint and token are injected.
-Elsewhere, set `FORMATIO_ENDPOINT` (the public endpoint on the Tracing card) and
-`FORMATIO_TOKEN`, or pass `formatio_otel.init(endpoint=..., token=..., service_name=...)`. The
-standard `OTEL_EXPORTER_OTLP_*` variables are honoured before the `FORMATIO_*` ones. Without an
-endpoint and a token, `init()` logs one warning and tracing stays off.
+Elsewhere, set the standard OTLP variables from the Tracing card:
+
+```sh
+export OTEL_EXPORTER_OTLP_ENDPOINT='https://your-formatio-host/otlp'
+export OTEL_EXPORTER_OTLP_HEADERS='authorization=Bearer <tracing token>'
+```
+
+`formatio_otel.init(endpoint=..., token=..., service_name=...)` arguments override them. Without
+an endpoint and a token, `init()` logs one warning and tracing stays off.
 
 `init()` instruments whichever of these are installed: FastAPI, Starlette, Django, Flask,
 requests, httpx, urllib, urllib3, psycopg, psycopg2, SQLAlchemy, redis and Celery. Uncaught

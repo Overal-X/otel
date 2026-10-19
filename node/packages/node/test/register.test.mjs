@@ -13,7 +13,7 @@ for (const [flag, fixture] of [
   test(`${flag} @formatio/otel-node/register instruments an Express app (${fixture})`, async (t) => {
     const app = runNode(
       [flag, "@formatio/otel-node/register", fixture],
-      childEnv({ OTEL_EXPORTER_OTLP_ENDPOINT: receiver.url, FORMATIO_TOKEN: "t", OTEL_SERVICE_NAME: fixture }),
+      childEnv({ OTEL_EXPORTER_OTLP_ENDPOINT: receiver.url, OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer%20t", OTEL_SERVICE_NAME: fixture }),
     );
     t.after(() => app.child.kill());
     const [, port] = await app.waitForLine(/listening (\d+)/);

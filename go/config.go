@@ -17,13 +17,13 @@ type options struct {
 }
 
 // WithEndpoint sets the base OTLP endpoint (the public endpoint on the Tracing card); spans go
-// to its "/v1/traces". It wins over every OTEL_* and FORMATIO_* endpoint variable.
+// to its "/v1/traces". It wins over every OTEL_* endpoint variable.
 func WithEndpoint(endpoint string) Option {
 	return func(o *options) { o.endpoint = endpoint }
 }
 
 // WithToken sends "authorization: Bearer <token>" in place of any headers from
-// OTEL_EXPORTER_OTLP_TRACES_HEADERS, OTEL_EXPORTER_OTLP_HEADERS or FORMATIO_TOKEN.
+// OTEL_EXPORTER_OTLP_TRACES_HEADERS or OTEL_EXPORTER_OTLP_HEADERS.
 func WithToken(token string) Option {
 	return func(o *options) { o.token = token }
 }
@@ -43,12 +43,12 @@ type config struct {
 const tracesPath = "/v1/traces"
 
 var (
-	errNoEndpoint = errors.New("no endpoint; set FORMATIO_ENDPOINT or OTEL_EXPORTER_OTLP_ENDPOINT")
-	errNoToken    = errors.New("no token; set FORMATIO_TOKEN or OTEL_EXPORTER_OTLP_HEADERS")
+	errNoEndpoint = errors.New("no endpoint; set OTEL_EXPORTER_OTLP_ENDPOINT")
+	errNoToken    = errors.New("no token; set an authorization header in OTEL_EXPORTER_OTLP_HEADERS")
 )
 
 // resolve applies the precedence every Formatio SDK shares: options, then the standard OTEL_*
-// variables, then the FORMATIO_* shorthands. An error says why tracing has to stay off.
+// variables. An error says why tracing has to stay off.
 func resolve(o options, getenv func(string) string) (config, error) {
 	cfg := config{
 		tracesURL:   resolveTracesURL(o, getenv),
@@ -75,10 +75,8 @@ func resolveTracesURL(o options, getenv func(string) string) string {
 	if v := getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"); v != "" {
 		return v
 	}
-	for _, key := range []string{"OTEL_EXPORTER_OTLP_ENDPOINT", "FORMATIO_ENDPOINT"} {
-		if v := getenv(key); v != "" {
-			return withTracesPath(v)
-		}
+	if v := getenv("OTEL_EXPORTER_OTLP_ENDPOINT"); v != "" {
+		return withTracesPath(v)
 	}
 	return ""
 }
@@ -100,9 +98,6 @@ func resolveHeaders(o options, getenv func(string) string) map[string]string {
 		if v := getenv(key); v != "" {
 			return parseHeaders(v)
 		}
-	}
-	if token := getenv("FORMATIO_TOKEN"); token != "" {
-		return bearer(token)
 	}
 	return nil
 }

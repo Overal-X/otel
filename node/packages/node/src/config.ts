@@ -1,5 +1,5 @@
 export interface InitOptions {
-  /** Base URL of the OTLP intake, like `FORMATIO_ENDPOINT`; `/v1/traces` is appended. */
+  /** Base URL of the OTLP intake, like `OTEL_EXPORTER_OTLP_ENDPOINT`; `/v1/traces` is appended. */
   endpoint?: string;
   /** Formatio tracing token, sent as `authorization: Bearer <token>`. */
   token?: string;
@@ -21,7 +21,7 @@ const TRACES_PATH = "/v1/traces";
 
 /**
  * Applies the contract shared by every Formatio SDK: explicit options, then the standard
- * `OTEL_*` env, then the `FORMATIO_*` shorthands. The intake rejects unauthenticated exports, so
+ * `OTEL_*` env. The intake rejects unauthenticated exports, so
  * an endpoint without an `authorization` header is as unusable as no endpoint.
  */
 export function resolveConfig(options: InitOptions, env: Env): Resolution {
@@ -35,7 +35,7 @@ export function resolveConfig(options: InitOptions, env: Env): Resolution {
 function tracesUrl(options: InitOptions, env: Env): string | undefined {
   if (options.endpoint) return joinTracesPath(options.endpoint);
   if (env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT) return env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT;
-  const base = env.OTEL_EXPORTER_OTLP_ENDPOINT || env.FORMATIO_ENDPOINT;
+  const base = env.OTEL_EXPORTER_OTLP_ENDPOINT;
   return base ? joinTracesPath(base) : undefined;
 }
 
@@ -49,8 +49,7 @@ export function joinTracesPath(base: string): string {
 function headers(options: InitOptions, env: Env): Record<string, string> {
   if (options.token) return bearer(options.token);
   const raw = env.OTEL_EXPORTER_OTLP_TRACES_HEADERS || env.OTEL_EXPORTER_OTLP_HEADERS;
-  if (raw) return parseHeaders(raw);
-  return env.FORMATIO_TOKEN ? bearer(env.FORMATIO_TOKEN) : {};
+  return raw ? parseHeaders(raw) : {};
 }
 
 function bearer(token: string): Record<string, string> {

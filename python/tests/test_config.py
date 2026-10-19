@@ -10,7 +10,7 @@ BEARER = {"authorization": "Bearer t"}
     ("env", "kwargs", "endpoint"),
     [
         pytest.param(
-            {"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "http://traces/v1/traces", "FORMATIO_ENDPOINT": "http://f"},
+            {"OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "http://traces/v1/traces", "OTEL_EXPORTER_OTLP_ENDPOINT": "http://o"},
             {"endpoint": "http://arg"},
             "http://arg/v1/traces",
             id="argument wins",
@@ -22,15 +22,15 @@ BEARER = {"authorization": "Bearer t"}
             id="traces endpoint used as-is",
         ),
         pytest.param(
-            {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://o/", "FORMATIO_ENDPOINT": "http://f"},
+            {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://o/"},
             {},
             "http://o/v1/traces",
             id="otlp endpoint gets the path once",
         ),
-        pytest.param({"FORMATIO_ENDPOINT": "https://f.example"}, {}, "https://f.example/v1/traces", id="formatio"),
+        pytest.param({"FORMATIO_ENDPOINT": "https://f.example"}, {}, None, id="FORMATIO_ENDPOINT is not read"),
         pytest.param({"OTEL_EXPORTER_OTLP_ENDPOINT": ""}, {"endpoint": "http://arg/"}, "http://arg/v1/traces", id="trailing slash"),
         pytest.param({}, {"endpoint": "http://arg/v1/traces"}, "http://arg/v1/traces", id="argument with the path"),
-        pytest.param({"FORMATIO_ENDPOINT": "http://f/v1/traces/"}, {}, "http://f/v1/traces", id="base with the path"),
+        pytest.param({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://f/v1/traces/"}, {}, "http://f/v1/traces", id="base with the path"),
     ],
 )
 def test_endpoint_precedence(env, kwargs, endpoint):
@@ -48,31 +48,31 @@ def test_endpoint_precedence(env, kwargs, endpoint):
             id="traces headers before otlp headers",
         ),
         pytest.param(
-            {"OTEL_EXPORTER_OTLP_HEADERS": "authorization=Bearer t,x-extra=1", "FORMATIO_TOKEN": "other"},
+            {"OTEL_EXPORTER_OTLP_HEADERS": "authorization=Bearer t,x-extra=1"},
             {},
             {**BEARER, "x-extra": "1"},
-            id="otlp headers before formatio token",
+            id="otlp headers",
         ),
-        pytest.param({"FORMATIO_TOKEN": "t"}, {}, BEARER, id="formatio token"),
+        pytest.param({"FORMATIO_TOKEN": "t"}, {}, {}, id="FORMATIO_TOKEN is not read"),
         pytest.param({}, {}, {}, id="none"),
     ],
 )
 def test_header_precedence(env, kwargs, headers):
-    assert resolve({"FORMATIO_ENDPOINT": "http://f", **env}, **kwargs).headers == headers
+    assert resolve({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://f", **env}, **kwargs).headers == headers
 
 
 def test_service_name_argument():
-    assert resolve({"FORMATIO_ENDPOINT": "http://f"}, service_name="api").service_name == "api"
+    assert resolve({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://f"}, service_name="api").service_name == "api"
 
 
 @pytest.mark.parametrize(
     ("env", "missing"),
     [
         ({}, "no endpoint"),
-        ({"FORMATIO_TOKEN": "t"}, "no endpoint"),
+        ({"FORMATIO_ENDPOINT": "http://f", "FORMATIO_TOKEN": "t"}, "no endpoint"),
         ({"OTEL_EXPORTER_OTLP_HEADERS": "a=b", "OTEL_EXPORTER_OTLP_ENDPOINT": ""}, "no endpoint"),
-        ({"FORMATIO_ENDPOINT": "http://f"}, "no token"),
-        ({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://o", "FORMATIO_TOKEN": ""}, "no token"),
+        ({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://o"}, "no token"),
+        ({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://o", "OTEL_EXPORTER_OTLP_HEADERS": ""}, "no token"),
     ],
 )
 def test_nothing_to_export_to(env, missing):
@@ -80,7 +80,7 @@ def test_nothing_to_export_to(env, missing):
 
 
 def test_endpoint_and_token_is_enough():
-    assert resolve({"FORMATIO_ENDPOINT": "http://f", "FORMATIO_TOKEN": "t"}).missing() is None
+    assert resolve({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://f", "OTEL_EXPORTER_OTLP_HEADERS": "authorization=Bearer%20t"}).missing() is None
 
 
 def test_disabled_instrumentations():
@@ -94,7 +94,7 @@ def test_curated_names_are_normalized():
 
 @pytest.mark.parametrize(
     ("env", "warning"),
-    [({}, "no endpoint"), ({"FORMATIO_ENDPOINT": "http://127.0.0.1:9"}, "no token")],
+    [({}, "no endpoint"), ({"OTEL_EXPORTER_OTLP_ENDPOINT": "http://127.0.0.1:9"}, "no token")],
     ids=["no endpoint", "no token"],
 )
 def test_init_unconfigured_warns_once_and_is_a_noop(env, warning):

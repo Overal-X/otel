@@ -19,8 +19,9 @@ export { register, onRequestError } from "@formatio/otel-next";
 `onRequestError` records errors from server components, route handlers, server actions and
 middleware with `next.route` and `next.route_type`, on the request's span.
 
-On Formatio, turn **Tracing** on for the application. Elsewhere, set `FORMATIO_ENDPOINT` and
-`FORMATIO_TOKEN`.
+On Formatio, turn **Tracing** on for the application. Elsewhere, set
+`OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` as in
+[`@formatio/otel-node`](../node#setup).
 
 If the build bundles the SDK into the server, keep it external so its instrumentation can patch
 modules at load time:

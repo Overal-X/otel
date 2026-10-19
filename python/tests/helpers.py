@@ -71,7 +71,7 @@ def clean_env(**overrides: str) -> dict[str, str]:
     env = {
         k: v
         for k, v in os.environ.items()
-        if not k.startswith(("OTEL_", "FORMATIO_"))
+        if not k.startswith("OTEL_")
     }
     # macOS: a forked child that asks the system for proxy settings can abort (the requests
     # session the exporter uses does). Any *_proxy variable keeps urllib on the environment.

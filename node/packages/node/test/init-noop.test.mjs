@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { trace } from "@opentelemetry/api";
 
 for (const key of Object.keys(process.env)) {
-  if (key.startsWith("OTEL_") || key.startsWith("FORMATIO_")) delete process.env[key];
+  if (key.startsWith("OTEL_")) delete process.env[key];
 }
 
 const { init, captureException, flush, shutdown } = await import("@formatio/otel-node");
@@ -35,8 +35,8 @@ test("init with nothing configured warns once, starts nothing and never throws",
 });
 
 test("a second init warns and does nothing", () => {
-  process.env.FORMATIO_ENDPOINT = "http://127.0.0.1:9";
-  process.env.FORMATIO_TOKEN = "t";
+  process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:9";
+  process.env.OTEL_EXPORTER_OTLP_HEADERS = "authorization=Bearer%20t";
   const warnings = captureWarnings(() => init());
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /already called/);

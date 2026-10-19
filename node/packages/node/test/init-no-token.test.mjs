@@ -3,9 +3,9 @@ import { test } from "node:test";
 import { trace } from "@opentelemetry/api";
 
 for (const key of Object.keys(process.env)) {
-  if (key.startsWith("OTEL_") || key.startsWith("FORMATIO_")) delete process.env[key];
+  if (key.startsWith("OTEL_")) delete process.env[key];
 }
-process.env.FORMATIO_ENDPOINT = "http://127.0.0.1:9";
+process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:9";
 
 const { init } = await import("@formatio/otel-node");
 

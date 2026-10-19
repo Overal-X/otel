@@ -5,14 +5,14 @@ import { test } from "node:test";
 const require = createRequire(import.meta.url);
 const { resolveConfig, parseHeaders } = require("../dist/config.js");
 
-const auth = { FORMATIO_TOKEN: "tok" };
+const auth = { OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer%20tok" };
 
 test("endpoint precedence", async (t) => {
   const cases = [
     {
       name: "option wins over every env and is a base URL",
       options: { endpoint: "https://opt.example" },
-      env: { ...auth, OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "https://t.example/x", OTEL_EXPORTER_OTLP_ENDPOINT: "https://o.example", FORMATIO_ENDPOINT: "https://f.example" },
+      env: { ...auth, OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "https://t.example/x", OTEL_EXPORTER_OTLP_ENDPOINT: "https://o.example" },
       url: "https://opt.example/v1/traces",
     },
     {
@@ -22,13 +22,8 @@ test("endpoint precedence", async (t) => {
     },
     {
       name: "OTEL_EXPORTER_OTLP_ENDPOINT gains /v1/traces",
-      env: { ...auth, OTEL_EXPORTER_OTLP_ENDPOINT: "https://o.example/", FORMATIO_ENDPOINT: "https://f.example" },
-      url: "https://o.example/v1/traces",
-    },
-    {
-      name: "FORMATIO_ENDPOINT gains /v1/traces",
-      env: { ...auth, FORMATIO_ENDPOINT: "https://f.example/otlp" },
-      url: "https://f.example/otlp/v1/traces",
+      env: { ...auth, OTEL_EXPORTER_OTLP_ENDPOINT: "https://o.example/otlp" },
+      url: "https://o.example/otlp/v1/traces",
     },
     {
       name: "a base that already ends in /v1/traces is not doubled, trailing slash or not",
@@ -42,13 +37,13 @@ test("endpoint precedence", async (t) => {
       url: "https://opt.example/v1/traces",
     },
     {
-      name: "FORMATIO_ENDPOINT with trailing slashes",
-      env: { ...auth, FORMATIO_ENDPOINT: "https://f.example/otlp//" },
+      name: "OTEL_EXPORTER_OTLP_ENDPOINT with trailing slashes",
+      env: { ...auth, OTEL_EXPORTER_OTLP_ENDPOINT: "https://f.example/otlp//" },
       url: "https://f.example/otlp/v1/traces",
     },
     {
-      name: "empty variables count as unset",
-      env: { ...auth, OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "", OTEL_EXPORTER_OTLP_ENDPOINT: "", FORMATIO_ENDPOINT: "https://f.example" },
+      name: "an empty traces endpoint counts as unset",
+      env: { ...auth, OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "", OTEL_EXPORTER_OTLP_ENDPOINT: "https://f.example" },
       url: "https://f.example/v1/traces",
     },
   ];
@@ -60,12 +55,12 @@ test("endpoint precedence", async (t) => {
 });
 
 test("auth precedence", async (t) => {
-  const endpoint = { FORMATIO_ENDPOINT: "https://f.example" };
+  const endpoint = { OTEL_EXPORTER_OTLP_ENDPOINT: "https://f.example" };
   const cases = [
     {
       name: "token option wins over env headers",
       options: { token: "opt" },
-      env: { ...endpoint, OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer%20env", FORMATIO_TOKEN: "f" },
+      env: { ...endpoint, OTEL_EXPORTER_OTLP_HEADERS: "authorization=Bearer%20env" },
       headers: { authorization: "Bearer opt" },
     },
     {
@@ -74,14 +69,9 @@ test("auth precedence", async (t) => {
       headers: { authorization: "Bearer traces" },
     },
     {
-      name: "generic headers are URL-decoded and win over FORMATIO_TOKEN",
-      env: { ...endpoint, OTEL_EXPORTER_OTLP_HEADERS: "Authorization=Bearer%20abc, x-extra = 1", FORMATIO_TOKEN: "f" },
+      name: "generic headers are URL-decoded",
+      env: { ...endpoint, OTEL_EXPORTER_OTLP_HEADERS: "Authorization=Bearer%20abc, x-extra = 1" },
       headers: { authorization: "Bearer abc", "x-extra": "1" },
-    },
-    {
-      name: "FORMATIO_TOKEN becomes a bearer header",
-      env: { ...endpoint, FORMATIO_TOKEN: "f" },
-      headers: { authorization: "Bearer f" },
     },
   ];
   for (const c of cases) {
@@ -93,19 +83,24 @@ test("auth precedence", async (t) => {
 
 test("nothing to export to", () => {
   assert.deepEqual(resolveConfig({}, {}), { missing: "endpoint" });
-  assert.deepEqual(resolveConfig({ token: "t" }, { FORMATIO_TOKEN: "t" }), { missing: "endpoint" });
+  assert.deepEqual(resolveConfig({ token: "t" }, auth), { missing: "endpoint" });
+});
+
+test("FORMATIO_* variables are not read", () => {
+  assert.deepEqual(resolveConfig({}, { FORMATIO_ENDPOINT: "https://f.example", FORMATIO_TOKEN: "t" }), { missing: "endpoint" });
 });
 
 test("an endpoint without an authorization header is not enough", () => {
-  assert.deepEqual(resolveConfig({}, { FORMATIO_ENDPOINT: "https://f.example" }), { missing: "token" });
+  const endpointOnly = { OTEL_EXPORTER_OTLP_ENDPOINT: "https://f.example" };
+  assert.deepEqual(resolveConfig({}, endpointOnly), { missing: "token" });
   assert.deepEqual(
-    resolveConfig({}, { FORMATIO_ENDPOINT: "https://f.example", OTEL_EXPORTER_OTLP_HEADERS: "x-other=1" }),
+    resolveConfig({}, { ...endpointOnly, OTEL_EXPORTER_OTLP_HEADERS: "x-other=1" }),
     { missing: "token" },
   );
 });
 
 test("serviceName option is passed through", () => {
-  assert.equal(resolveConfig({ serviceName: "api" }, { FORMATIO_ENDPOINT: "https://f", FORMATIO_TOKEN: "t" }).config.serviceName, "api");
+  assert.equal(resolveConfig({ serviceName: "api" }, { ...auth, OTEL_EXPORTER_OTLP_ENDPOINT: "https://f" }).config.serviceName, "api");
 });
 
 test("parseHeaders ignores malformed pairs", () => {

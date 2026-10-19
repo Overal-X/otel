@@ -4,7 +4,7 @@ import { beforeEach, test } from "node:test";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 
 for (const key of Object.keys(process.env)) {
-  if (key.startsWith("OTEL_") || key.startsWith("FORMATIO_")) delete process.env[key];
+  if (key.startsWith("OTEL_")) delete process.env[key];
 }
 
 // Tracing goes to an in-memory exporter through @formatio/otel-node's internal module, outside its
