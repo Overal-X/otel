@@ -49,15 +49,19 @@ import { captureException } from "@formatio/node";
 captureException(err, { "job.name": "nightly-sync" });
 ```
 
-Express and Fastify answer a thrown error with a 500 but do not record its stack. Add the hook:
+Fastify answers a thrown error with a 500 without recording it. Add its hook:
 
 ```js
-import { expressErrorHandler, setupFastifyErrorHandler } from "@formatio/node";
+import { setupFastifyErrorHandler } from "@formatio/node";
 
-app.use(expressErrorHandler()); // Express: after all routes, before your own error handlers
-setupFastifyErrorHandler(fastify); // Fastify
+setupFastifyErrorHandler(fastify);
 ```
 
-Errors with a 4xx `status`/`statusCode` are passed through unrecorded.
+Express errors are recorded with their stack by the Express instrumentation already.
+`app.use(expressErrorHandler())`, after all routes and before your own error handlers, also
+records the error on the request's own span; it is optional.
+
+Errors with a 4xx `status`/`statusCode`, such as a thrown `NotFound`, are never recorded, by
+these hooks or by any instrumentation.
 
 `flush(timeoutMs?)` exports pending spans; `shutdown()` flushes and stops the SDK.
