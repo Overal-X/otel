@@ -15,11 +15,11 @@ func routeOf(pattern string) string {
 	return ""
 }
 
-// exceptionType names a panic value the way the OTel SDK does when a span ends mid-panic, so
-// both kinds of record group as one error.
+// exceptionType names a panic value as "pkgpath.Name". It departs from the OTel SDK only for
+// predeclared types, which the SDK prints as ".string": the Errors page shows this name.
 func exceptionType(v any) string {
 	t := reflect.TypeOf(v)
-	if t.PkgPath() == "" && t.Name() == "" {
+	if t.PkgPath() == "" {
 		return t.String()
 	}
 	return fmt.Sprintf("%s.%s", t.PkgPath(), t.Name())
