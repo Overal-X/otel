@@ -6,7 +6,7 @@ for (const key of Object.keys(process.env)) {
   if (key.startsWith("OTEL_") || key.startsWith("FORMATIO_")) delete process.env[key];
 }
 
-const { init, captureException, flush, shutdown } = await import("@formatio/node");
+const { init, captureException, flush, shutdown } = await import("@formatio/otel-node");
 
 function captureWarnings(fn) {
   const original = console.warn;

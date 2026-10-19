@@ -4,7 +4,7 @@ import { SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
 import { startInMemory } from "./helpers/in-memory.mjs";
 
 const { exporter, finishedSpans } = startInMemory();
-const { captureException } = await import("@formatio/node");
+const { captureException } = await import("@formatio/otel-node");
 const tracer = trace.getTracer("test");
 
 beforeEach(() => exporter.reset());

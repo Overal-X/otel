@@ -1,5 +1,5 @@
 {
-  "name": "@formatio/node",
+  "name": "@formatio/otel-node",
   "version": "0.1.0",
   "description": "Tracing and error tracking for Node.js apps on Formatio, built on OpenTelemetry",
   "license": "MIT",

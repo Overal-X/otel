@@ -25,7 +25,7 @@ Object.assign(process.env, {
   OTEL_LOGS_EXPORTER: "otlp",
 });
 
-const { init, flush, shutdown, captureException } = await import("@formatio/node");
+const { init, flush, shutdown, captureException } = await import("@formatio/otel-node");
 init();
 after(() => shutdown());
 

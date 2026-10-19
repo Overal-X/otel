@@ -3,7 +3,7 @@ import { getRPCMetadata } from "@opentelemetry/core";
 import { exceptionAttributes, statusMessage } from "./exception";
 import { VERSION } from "./version";
 
-const tracer = () => trace.getTracer("@formatio/node", VERSION);
+const tracer = () => trace.getTracer("@formatio/otel-node", VERSION);
 
 /**
  * Records an error on the active span and marks it failed. With no span in progress — a

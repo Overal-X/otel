@@ -1,4 +1,4 @@
-const formatio = require("@formatio/node");
+const formatio = require("@formatio/otel-node");
 
 formatio.init();
 

@@ -7,7 +7,7 @@ for (const key of Object.keys(process.env)) {
   if (key.startsWith("OTEL_") || key.startsWith("FORMATIO_")) delete process.env[key];
 }
 
-// Tracing goes to an in-memory exporter through @formatio/node's internal module, outside its
+// Tracing goes to an in-memory exporter through @formatio/otel-node's internal module, outside its
 // public exports.
 const require = createRequire(import.meta.url);
 const { InMemorySpanExporter, SimpleSpanProcessor } = require("@opentelemetry/sdk-trace-base");
@@ -15,7 +15,7 @@ const { startTracing, flushTracing } = require("../../node/dist/sdk.js");
 const exporter = new InMemorySpanExporter();
 startTracing(new SimpleSpanProcessor(exporter));
 
-const { register, onRequestError } = await import("@formatio/next");
+const { register, onRequestError } = await import("@formatio/otel-next");
 
 async function finishedSpans() {
   await flushTracing(2000);
@@ -51,7 +51,7 @@ test("in the edge runtime both hooks do nothing", async () => {
   assert.deepEqual(await finishedSpans(), []);
 });
 
-test("register starts @formatio/node in the Node.js runtime", async () => {
+test("register starts @formatio/otel-node in the Node.js runtime", async () => {
   process.env.NEXT_RUNTIME = "nodejs";
   const warnings = await warningsDuring(() => register());
   // Nothing is configured here, so init's one warning is the proof that it ran.

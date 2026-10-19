@@ -2,14 +2,14 @@ import { requestErrorAttributes, type RequestErrorContext, type RequestErrorRequ
 
 export type { RequestErrorContext, RequestErrorRequest } from "./attributes";
 
-// @formatio/node is only ever imported dynamically, behind the literal NEXT_RUNTIME check: Next
+// @formatio/otel-node is only ever imported dynamically, behind the literal NEXT_RUNTIME check: Next
 // compiles instrumentation.ts for the edge runtime too, inlines NEXT_RUNTIME there, and drops
 // the dead branch, so the Node-only SDK never reaches the edge bundle.
 
-/** Next's `instrumentation.ts` `register` hook: starts `@formatio/node` in the Node.js runtime. */
+/** Next's `instrumentation.ts` `register` hook: starts `@formatio/otel-node` in the Node.js runtime. */
 export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { init } = await import("@formatio/node");
+    const { init } = await import("@formatio/otel-node");
     init();
   }
 }
@@ -24,7 +24,7 @@ export async function onRequestError(
   context: Readonly<RequestErrorContext>,
 ): Promise<void> {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { captureException } = await import("@formatio/node");
+    const { captureException } = await import("@formatio/otel-node");
     captureException(err, requestErrorAttributes(request, context));
   }
 }

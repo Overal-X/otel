@@ -5,7 +5,7 @@ import { SpanKind, SpanStatusCode } from "@opentelemetry/api";
 import { startInMemory } from "./helpers/in-memory.mjs";
 
 const { require, waitForSpan, exporter } = startInMemory();
-const { expressErrorHandler, setupFastifyErrorHandler } = await import("@formatio/node");
+const { expressErrorHandler, setupFastifyErrorHandler } = await import("@formatio/otel-node");
 
 // Required only after tracing started, as with --require: that is when they get patched.
 const express = require("express");

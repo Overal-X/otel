@@ -1,10 +1,10 @@
-# @formatio/node
+# @formatio/otel-node
 
 Tracing and error tracking for Node.js apps on [Formatio](https://formatio.cloud). A thin
 distribution of the OpenTelemetry Node SDK: it emits standard OTLP traces, nothing else.
 
 ```sh
-npm i @formatio/node
+npm i @formatio/otel-node
 ```
 
 ## Setup
@@ -17,18 +17,18 @@ Elsewhere, set `FORMATIO_ENDPOINT` (shown on the Tracing card) and `FORMATIO_TOK
 before any of your code runs:
 
 ```sh
-node --import @formatio/node/register server.js
-# or: NODE_OPTIONS="--import @formatio/node/register"
+node --import @formatio/otel-node/register server.js
+# or: NODE_OPTIONS="--import @formatio/otel-node/register"
 ```
 
 **CommonJS** — preload it the same way with `--require`, or call `init()` on the first line:
 
 ```sh
-node --require @formatio/node/register server.js
+node --require @formatio/otel-node/register server.js
 ```
 
 ```js
-require("@formatio/node").init(); // before anything else is required
+require("@formatio/otel-node").init(); // before anything else is required
 ```
 
 `init({ endpoint, token, serviceName })` options override the environment. With no endpoint or
@@ -44,7 +44,7 @@ decides what happens. `--unhandled-rejections` modes are respected.
 Report errors you handle yourself:
 
 ```js
-import { captureException } from "@formatio/node";
+import { captureException } from "@formatio/otel-node";
 
 captureException(err, { "job.name": "nightly-sync" });
 ```
@@ -52,7 +52,7 @@ captureException(err, { "job.name": "nightly-sync" });
 Fastify answers a thrown error with a 500 without recording it. Add its hook:
 
 ```js
-import { setupFastifyErrorHandler } from "@formatio/node";
+import { setupFastifyErrorHandler } from "@formatio/otel-node";
 
 setupFastifyErrorHandler(fastify);
 ```

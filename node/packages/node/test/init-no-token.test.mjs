@@ -7,7 +7,7 @@ for (const key of Object.keys(process.env)) {
 }
 process.env.FORMATIO_ENDPOINT = "http://127.0.0.1:9";
 
-const { init } = await import("@formatio/node");
+const { init } = await import("@formatio/otel-node");
 
 test("init with an endpoint but no token warns once and starts nothing", () => {
   const original = console.warn;

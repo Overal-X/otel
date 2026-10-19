@@ -1,5 +1,5 @@
 {
-  "name": "@formatio/next",
+  "name": "@formatio/otel-next",
   "version": "0.1.0",
   "description": "Tracing and error tracking for Next.js apps on Formatio, built on OpenTelemetry",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@formatio/node": "0.1.0"
+    "@formatio/otel-node": "0.1.0"
   },
   "peerDependencies": {
     "next": ">=15"

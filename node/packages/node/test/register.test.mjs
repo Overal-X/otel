@@ -10,9 +10,9 @@ for (const [flag, fixture] of [
   ["--import", "express-app.mjs"],
   ["--require", "express-app.cjs"],
 ]) {
-  test(`${flag} @formatio/node/register instruments an Express app (${fixture})`, async (t) => {
+  test(`${flag} @formatio/otel-node/register instruments an Express app (${fixture})`, async (t) => {
     const app = runNode(
-      [flag, "@formatio/node/register", fixture],
+      [flag, "@formatio/otel-node/register", fixture],
       childEnv({ OTEL_EXPORTER_OTLP_ENDPOINT: receiver.url, FORMATIO_TOKEN: "t", OTEL_SERVICE_NAME: fixture }),
     );
     t.after(() => app.child.kill());

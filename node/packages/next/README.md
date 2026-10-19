@@ -1,10 +1,10 @@
-# @formatio/next
+# @formatio/otel-next
 
 Tracing and error tracking for Next.js 15+ apps on [Formatio](https://formatio.cloud), built on
-[`@formatio/node`](../node).
+[`@formatio/otel-node`](../node).
 
 ```sh
-npm i @formatio/next
+npm i @formatio/otel-next
 ```
 
 ## Setup
@@ -12,7 +12,7 @@ npm i @formatio/next
 Create `instrumentation.ts` at the project root (or in `src/`):
 
 ```ts
-export { register, onRequestError } from "@formatio/next";
+export { register, onRequestError } from "@formatio/otel-next";
 ```
 
 `register` starts tracing in the Node.js runtime; the edge runtime is not traced.
@@ -27,7 +27,7 @@ modules at load time:
 
 ```js
 // next.config.js
-module.exports = { serverExternalPackages: ["@formatio/node"] };
+module.exports = { serverExternalPackages: ["@formatio/otel-node"] };
 ```
 
-Errors you handle yourself: `import { captureException } from "@formatio/node"`.
+Errors you handle yourself: `import { captureException } from "@formatio/otel-node"`.
