@@ -1,0 +1,32 @@
+version: "v1.0.0"
+
+# Declares net/http.formatioRecordPanic, which this package fills in through go:linkname.
+# Importing this package into net/http instead fails: it imports net/http itself.
+formatio_panic_var:
+  target: net/http
+  do:
+    - add_file:
+        file: "formatio_panic.go"
+        path: "github.com/overal-x/otel/go/otelc"
+
+# Placed just before the handler call, after otelc's own injected defer, so it runs first while
+# the request span is still open. The request argument is the one otelc replaced with the span's
+# context.
+formatio_record_handler_panic:
+  target: net/http
+  where:
+    func: ServeHTTP
+    recv: serverHandler
+    pattern: 'handler\.ServeHTTP\('
+    placement: before
+  do:
+    - inject_code:
+        raw: |-
+          defer func() {
+          	if v := recover(); v != nil {
+          		if formatioRecordPanic != nil {
+          			formatioRecordPanic({{ .FuncArgument 1 }}, v)
+          		}
+          		panic(v)
+          	}
+          }()

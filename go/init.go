@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/overal-x/otel/go/internal/zerocode"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -33,7 +34,13 @@ var warnings io.Writer = os.Stderr
 // OTEL_EXPORTER_OTLP_HEADERS. Without an endpoint or token, Init prints one warning to stderr and leaves
 // tracing off, so an unconfigured run still starts; err is non-nil only if the exporter cannot
 // be built.
+//
+// In a binary Formatio built with compile-time instrumentation, the pipeline already runs
+// before main: Init then installs nothing, and shutdown only flushes it.
 func Init(ctx context.Context, opts ...Option) (shutdown func(context.Context) error, err error) {
+	if zerocode.Active {
+		return flushGlobal, nil
+	}
 	var o options
 	for _, opt := range opts {
 		if opt != nil {
@@ -66,6 +73,14 @@ func Init(ctx context.Context, opts ...Option) (shutdown func(context.Context) e
 }
 
 func noShutdown(context.Context) error { return nil }
+
+func flushGlobal(ctx context.Context) error {
+	provider, ok := otel.GetTracerProvider().(interface{ ForceFlush(context.Context) error })
+	if !ok {
+		return nil
+	}
+	return provider.ForceFlush(ctx)
+}
 
 func newResource(serviceName string) *resource.Resource {
 	attrs := []attribute.KeyValue{

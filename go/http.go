@@ -3,6 +3,8 @@ package formatio
 import (
 	"net/http"
 
+	"github.com/overal-x/otel/go/internal/exception"
+	"github.com/overal-x/otel/go/internal/zerocode"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
 	"go.opentelemetry.io/otel/trace"
@@ -15,14 +17,27 @@ import (
 // A panic in h is recorded on the request span with its stack trace, then re-raised with the
 // same value, so net/http logs it and drops the connection exactly as without Formatio.
 // http.ErrAbortHandler is re-raised without being recorded.
+//
+// In a binary Formatio built with compile-time instrumentation, requests and panics are already
+// traced, and Handler returns h unchanged.
 func Handler(h http.Handler) http.Handler {
+	if zerocode.Active {
+		return h
+	}
 	// The operation name is unused: otelhttp's default formatter names spans from the request.
 	return otelhttp.NewHandler(recordPanics(h), "")
 }
 
 // Transport traces outbound requests and propagates the trace context to the server they call.
-// A nil rt means http.DefaultTransport.
+// A nil rt means http.DefaultTransport. In a binary built with compile-time instrumentation,
+// outbound requests are already traced, and Transport returns rt (or http.DefaultTransport).
 func Transport(rt http.RoundTripper) http.RoundTripper {
+	if zerocode.Active {
+		if rt == nil {
+			return http.DefaultTransport
+		}
+		return rt
+	}
 	return otelhttp.NewTransport(rt)
 }
 
@@ -45,7 +60,7 @@ func recordPanics(next http.Handler) http.Handler {
 				if route != "" {
 					span.SetName(r.Method + " " + route)
 				}
-				recordPanic(span, v)
+				exception.RecordPanic(span, v)
 			}
 			// otelhttp's deferred End would otherwise see the panic and, like any SDK span
 			// ended mid-panic, record it again without a stack trace (even ErrAbortHandler).

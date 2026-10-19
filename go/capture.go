@@ -2,14 +2,12 @@ package formatio
 
 import (
 	"context"
-	"fmt"
-	"runtime/debug"
 	"time"
 
+	"github.com/overal-x/otel/go/internal/exception"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -52,23 +50,10 @@ func Recover(ctx context.Context) {
 		return
 	}
 	_, span := tracer().Start(ctx, "uncaught exception", trace.WithSpanKind(trace.SpanKindInternal))
-	recordPanic(span, v)
+	exception.RecordPanic(span, v)
 	span.End()
 	flush()
 	panic(v)
-}
-
-// recordPanic writes the exception event the OTel SDK adds to a span ended mid-panic, with the
-// same type and message, plus the stack trace and exception.escaped the SDK leaves out.
-func recordPanic(span trace.Span, v any) {
-	message := fmt.Sprint(v)
-	span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(
-		semconv.ExceptionType(exceptionType(v)),
-		semconv.ExceptionMessage(message),
-		semconv.ExceptionStacktrace(string(debug.Stack())),
-		attribute.Bool("exception.escaped", true),
-	))
-	span.SetStatus(codes.Error, message)
 }
 
 func flush() {
