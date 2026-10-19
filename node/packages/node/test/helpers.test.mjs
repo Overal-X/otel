@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import { test } from "node:test";
 
 const require = createRequire(import.meta.url);
-const { exceptionAttributes, isServerError, statusMessage } = require("../dist/exception.js");
+const { exceptionAttributes, isServerError, messageOf, statusMessage, withMessage } = require("../dist/exception.js");
 const { unhandledRejectionsMode } = require("../dist/node-flags.js");
 
 test("exceptionAttributes matches recordException for errors", () => {
@@ -15,6 +15,22 @@ test("exceptionAttributes matches recordException for errors", () => {
   });
   const coded = Object.assign(new Error("refused"), { code: "ECONNREFUSED" });
   assert.equal(exceptionAttributes(coded)["exception.type"], "ECONNREFUSED");
+});
+
+test("an AggregateError without a message takes its inner errors' messages", () => {
+  const refused = (address) => Object.assign(new Error(`connect ECONNREFUSED ${address}`), { code: "ECONNREFUSED" });
+  const err = Object.assign(new AggregateError([refused("::1:1"), refused("127.0.0.1:1"), refused("::1:1")]), {
+    code: "ECONNREFUSED",
+  });
+  assert.equal(messageOf(err), "connect ECONNREFUSED ::1:1; connect ECONNREFUSED 127.0.0.1:1");
+  assert.equal(exceptionAttributes(err)["exception.message"], messageOf(err));
+
+  const copy = withMessage(err);
+  assert.deepEqual(copy, { code: "ECONNREFUSED", name: "AggregateError", message: messageOf(err), stack: err.stack });
+  const plain = new Error("already has one");
+  assert.equal(withMessage(plain), plain);
+  assert.equal(withMessage("a string"), "a string");
+  assert.equal(messageOf(new AggregateError([])), undefined);
 });
 
 test("exceptionAttributes sets escaped only when asked", () => {

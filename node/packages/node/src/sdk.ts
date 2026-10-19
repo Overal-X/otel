@@ -19,6 +19,7 @@ import {
 import type { SpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { ExceptionFilter } from "./exception-filter";
 import { VERSION } from "./version";
 
 // Noisy enough to crowd real requests out of the intake's per-trace limits.
@@ -41,7 +42,7 @@ export function startTracing(processor: SpanProcessor, serviceName?: string): vo
   enableDiagLogger();
   provider = new NodeTracerProvider({
     resource: buildResource(serviceName),
-    spanProcessors: [processor],
+    spanProcessors: [new ExceptionFilter(), processor],
   });
   provider.register({
     propagator: new CompositePropagator({

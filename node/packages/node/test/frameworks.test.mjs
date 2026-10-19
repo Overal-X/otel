@@ -46,7 +46,23 @@ test("expressErrorHandler records the stack on the request's span", async () => 
 
   assert.equal((await fetch(`${base}/missing`)).status, 404);
   const missing = await waitForSpan(serverSpan("/missing"));
-  assert.equal(exceptionEvent(missing), undefined, "4xx errors are not recorded on the server span");
+  const inTrace = exporter.getFinishedSpans().filter((s) => s.spanContext().traceId === missing.spanContext().traceId);
+  assert.ok(inTrace.length > 1, "the express layer spans were exported");
+  assert.deepEqual(inTrace.filter(exceptionEvent).map((s) => s.name), [], "no span records a 4xx error");
+});
+
+test("a refused connection is recorded with its inner errors' message", async () => {
+  const closed = createServer();
+  await new Promise((resolve) => closed.listen(0, resolve));
+  const { port } = closed.address();
+  await new Promise((resolve) => closed.close(resolve));
+
+  // localhost resolves to ::1 and 127.0.0.1, so undici fails with an AggregateError.
+  await assert.rejects(fetch(`http://localhost:${port}/`));
+  const span = await waitForSpan((s) => s.kind === SpanKind.CLIENT && exceptionEvent(s));
+  const event = exceptionEvent(span);
+  assert.equal(event.attributes["exception.type"], "ECONNREFUSED");
+  assert.match(event.attributes["exception.message"], /connect ECONNREFUSED/);
 });
 
 test("setupFastifyErrorHandler records the stack on the request's span", async () => {

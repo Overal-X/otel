@@ -25,10 +25,11 @@ export function exceptionAttributes(value: unknown, escaped = false): Attributes
   if (typeof value === "string") {
     attrs[ATTR_EXCEPTION_MESSAGE] = value;
   } else if (value !== null && typeof value === "object") {
-    const { code, name, message, stack } = value as ErrorLike;
+    const { code, name, stack } = value as ErrorLike;
     const type = code || name;
+    const message = messageOf(value as ErrorLike);
     if (type) attrs[ATTR_EXCEPTION_TYPE] = String(type);
-    if (message) attrs[ATTR_EXCEPTION_MESSAGE] = String(message);
+    if (message) attrs[ATTR_EXCEPTION_MESSAGE] = message;
     if (stack) attrs[ATTR_EXCEPTION_STACKTRACE] = String(stack);
   }
   if (!attrs[ATTR_EXCEPTION_TYPE] && !attrs[ATTR_EXCEPTION_MESSAGE]) {
@@ -36,6 +37,33 @@ export function exceptionAttributes(value: unknown, escaped = false): Attributes
   }
   if (escaped) attrs[ATTR_EXCEPTION_ESCAPED] = true;
   return attrs;
+}
+
+/**
+ * An error's message, or for an `AggregateError` without one, its inner errors' messages:
+ * Node's refused connections arrive that way (`ECONNREFUSED` with an empty message, one inner
+ * error per address tried).
+ */
+export function messageOf(value: ErrorLike): string | undefined {
+  if (value.message) return String(value.message);
+  const inner = (value as { errors?: unknown }).errors;
+  if (!Array.isArray(inner)) return undefined;
+  const messages = new Set(
+    inner.map((e) => (e as ErrorLike | null)?.message).filter(Boolean).map(String),
+  );
+  return messages.size > 0 ? [...messages].join("; ") : undefined;
+}
+
+/**
+ * The value to hand the OTel SDK's `recordException`, which drops an empty message: an
+ * error-like copy carrying `messageOf`, or the value itself when that changes nothing.
+ */
+export function withMessage<T>(value: T): T | ErrorLike {
+  if (value === null || typeof value !== "object") return value;
+  const error = value as ErrorLike;
+  const message = messageOf(error);
+  if (!message || message === error.message) return value;
+  return { code: error.code, name: error.name, message, stack: error.stack };
 }
 
 export function statusMessage(value: unknown): string {
