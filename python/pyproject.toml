@@ -1,0 +1,51 @@
+[project]
+name = "formatio"
+dynamic = ["version"]
+description = "Tracing and error tracking for Formatio: a thin OpenTelemetry distribution"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "opentelemetry-api~=1.45.1",
+    "opentelemetry-sdk~=1.45.1",
+    "opentelemetry-exporter-otlp-proto-http~=1.45.1",
+    "opentelemetry-instrumentation==0.66b1",
+    "opentelemetry-instrumentation-asgi==0.66b1",
+    "opentelemetry-instrumentation-wsgi==0.66b1",
+    "opentelemetry-instrumentation-fastapi==0.66b1",
+    "opentelemetry-instrumentation-starlette==0.66b1",
+    "opentelemetry-instrumentation-django==0.66b1",
+    "opentelemetry-instrumentation-flask==0.66b1",
+    "opentelemetry-instrumentation-requests==0.66b1",
+    "opentelemetry-instrumentation-httpx==0.66b1",
+    "opentelemetry-instrumentation-urllib==0.66b1",
+    "opentelemetry-instrumentation-urllib3==0.66b1",
+    "opentelemetry-instrumentation-psycopg==0.66b1",
+    "opentelemetry-instrumentation-psycopg2==0.66b1",
+    "opentelemetry-instrumentation-sqlalchemy==0.66b1",
+    "opentelemetry-instrumentation-redis==0.66b1",
+    "opentelemetry-instrumentation-celery==0.66b1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "flask>=3",
+    "fastapi>=0.110",
+    "httpx>=0.27",
+    "gunicorn>=23",
+    "uwsgi>=2.0.31; sys_platform != 'win32'",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/formatio/version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/formatio"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

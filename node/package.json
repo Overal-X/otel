@@ -1,0 +1,16 @@
+{
+  "name": "otel-node",
+  "private": true,
+  "workspaces": [
+    "packages/node",
+    "packages/next"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run build && node --test \"packages/*/test/*.test.mjs\""
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "typescript": "7.0.2"
+  }
+}
