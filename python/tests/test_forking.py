@@ -15,8 +15,8 @@ from opentelemetry.proto.trace.v1.trace_pb2 import Span
 
 APP = """
 import os, time
-import formatio
-formatio.init()
+import formatio_otel
+formatio_otel.init()
 import flask
 from opentelemetry import trace
 
@@ -100,10 +100,10 @@ def assert_every_worker_exports(command, cwd, receiver, port):
 
 
 POST_FORK_CONF = """
-import formatio
+import formatio_otel
 
 def post_fork(server, worker):
-    formatio.init()
+    formatio_otel.init()
 """
 
 
@@ -117,7 +117,7 @@ def test_gunicorn_workers_export(tmp_path, receiver, setup):
         # processor restarts its thread in each.
         command.append("--preload")
     elif setup == "post-fork":
-        app = APP.replace("formatio.init()", "")
+        app = APP.replace("formatio_otel.init()", "")
         (tmp_path / "gunicorn.conf.py").write_text(POST_FORK_CONF)
     (tmp_path / "app.py").write_text(app)
     assert_every_worker_exports(command, tmp_path, receiver, port)

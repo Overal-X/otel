@@ -9,9 +9,9 @@ from opentelemetry import trace
 from opentelemetry.trace import SpanKind, Status, StatusCode
 from opentelemetry.util.types import Attributes
 
-from formatio.version import __version__
+from formatio_otel.version import __version__
 
-logger = logging.getLogger("formatio")
+logger = logging.getLogger("formatio_otel")
 
 CRASH_FLUSH_MILLIS = 2000
 
@@ -76,4 +76,4 @@ def _record(span: trace.Span, exc: BaseException, attributes: Attributes, escape
 
 
 def _tracer() -> trace.Tracer:
-    return trace.get_tracer("formatio", __version__)
+    return trace.get_tracer("formatio_otel", __version__)

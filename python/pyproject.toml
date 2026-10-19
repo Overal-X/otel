@@ -42,10 +42,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "src/formatio/version.py"
+path = "src/formatio_otel/version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/formatio"]
+packages = ["src/formatio_otel"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

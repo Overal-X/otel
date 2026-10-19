@@ -8,17 +8,17 @@ OpenTelemetry keeps every trace and error group.
 pip install formatio-otel
 ```
 
-The package installs as `formatio-otel` and imports as `formatio`.
+The package installs as `formatio-otel` and imports as `formatio_otel`.
 
 ```python
-import formatio
+import formatio_otel
 
-formatio.init()
+formatio_otel.init()
 ```
 
 On Formatio, turn **Tracing** on for the application: the endpoint and token are injected.
 Elsewhere, set `FORMATIO_ENDPOINT` (the public endpoint on the Tracing card) and
-`FORMATIO_TOKEN`, or pass `formatio.init(endpoint=..., token=..., service_name=...)`. The
+`FORMATIO_TOKEN`, or pass `formatio_otel.init(endpoint=..., token=..., service_name=...)`. The
 standard `OTEL_EXPORTER_OTLP_*` variables are honoured before the `FORMATIO_*` ones. Without an
 endpoint and a token, `init()` logs one warning and tracing stays off.
 
@@ -35,9 +35,9 @@ classes.
 **FastAPI**
 
 ```python
-import formatio
+import formatio_otel
 
-formatio.init()
+formatio_otel.init()
 
 from fastapi import FastAPI
 
@@ -47,9 +47,9 @@ app = FastAPI()
 **Flask**
 
 ```python
-import formatio
+import formatio_otel
 
-formatio.init()
+formatio_otel.init()
 
 from flask import Flask
 
@@ -62,9 +62,9 @@ before `get_wsgi_application()` / `execute_from_command_line()`.
 ```python
 import os
 
-import formatio
+import formatio_otel
 
-formatio.init()
+formatio_otel.init()
 
 from django.core.wsgi import get_wsgi_application
 
@@ -79,10 +79,10 @@ thread is restarted in every worker after the fork. You can also call it from a 
 hook in `gunicorn.conf.py`, as long as the app module is imported afterwards (no `--preload`):
 
 ```python
-import formatio
+import formatio_otel
 
 def post_fork(server, worker):
-    formatio.init()
+    formatio_otel.init()
 ```
 
 **uWSGI** forks without Python's fork hooks, so a provider created in the master never exports
@@ -100,12 +100,12 @@ enable-threads = true
 try:
     charge(order)
 except PaymentError:
-    formatio.capture_exception(attributes={"order.id": order.id})
+    formatio_otel.capture_exception(attributes={"order.id": order.id})
 ```
 
 `capture_exception(exc=None, attributes=None)` records the exception being handled (or `exc`)
 on the current span and marks it failed; with no span active it reports it on its own span.
 `attributes` are set on that span.
 
-`formatio.flush(timeout_millis=2000)` exports what is queued, and `formatio.shutdown()` flushes
+`formatio_otel.flush(timeout_millis=2000)` exports what is queued, and `formatio_otel.shutdown()` flushes
 and stops; both also happen at interpreter exit.

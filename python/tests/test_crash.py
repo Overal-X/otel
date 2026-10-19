@@ -11,7 +11,7 @@ def crash_event(span):
 
 def test_uncaught_exception_is_exported_and_the_exit_code_kept(receiver):
     without_sdk = run_python(CRASH, clean_env())
-    with_sdk = run_python("import formatio\nformatio.init()\n" + CRASH, clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"))
+    with_sdk = run_python("import formatio_otel\nformatio_otel.init()\n" + CRASH, clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"))
 
     assert without_sdk.returncode == with_sdk.returncode == 1
     assert "ValueError: missing DATABASE_URL" in with_sdk.stderr
@@ -30,8 +30,8 @@ def test_uncaught_exception_is_exported_and_the_exit_code_kept(receiver):
 
 def test_thread_crash_is_exported_and_the_thread_hook_chained(receiver):
     result = run_python(
-        "import threading, formatio\n"
-        "formatio.init()\n"
+        "import threading, formatio_otel\n"
+        "formatio_otel.init()\n"
         "def job():\n"
         "    raise RuntimeError('job failed')\n"
         "t = threading.Thread(target=job)\n"
@@ -51,9 +51,9 @@ def test_thread_crash_is_exported_and_the_thread_hook_chained(receiver):
 
 def test_previous_excepthook_still_runs(receiver):
     result = run_python(
-        "import sys, formatio\n"
+        "import sys, formatio_otel\n"
         "sys.excepthook = lambda *exc: print('app hook', exc[1])\n"
-        "formatio.init()\n"
+        "formatio_otel.init()\n"
         "raise SystemError('down')\n",
         clean_env(FORMATIO_ENDPOINT=receiver.url, FORMATIO_TOKEN="t"),
     )

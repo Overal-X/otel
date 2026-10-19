@@ -13,12 +13,12 @@ from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
-from formatio import config
-from formatio._capture import install_crash_hooks
-from formatio._instrument import instrument_installed
-from formatio.version import __version__
+from formatio_otel import config
+from formatio_otel._capture import install_crash_hooks
+from formatio_otel._instrument import instrument_installed
+from formatio_otel.version import __version__
 
-logger = logging.getLogger("formatio")
+logger = logging.getLogger("formatio_otel")
 
 _lock = threading.Lock()
 _initialized = False

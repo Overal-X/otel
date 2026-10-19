@@ -1,7 +1,7 @@
 import pytest
 from helpers import clean_env, run_python
 
-from formatio.config import disabled_instrumentations, is_curated, resolve
+from formatio_otel.config import disabled_instrumentations, is_curated, resolve
 
 BEARER = {"authorization": "Bearer t"}
 
@@ -99,15 +99,15 @@ def test_curated_names_are_normalized():
 )
 def test_init_unconfigured_warns_once_and_is_a_noop(env, warning):
     result = run_python(
-        "import formatio\n"
-        "formatio.init()\n"
-        "formatio.init()\n"
+        "import formatio_otel\n"
+        "formatio_otel.init()\n"
+        "formatio_otel.init()\n"
         "from opentelemetry import trace\n"
         "with trace.get_tracer('t').start_as_current_span('s') as span:\n"
         "    assert not span.is_recording()\n"
-        "formatio.capture_exception(ValueError('x'))\n"
-        "assert formatio.flush() is False\n"
-        "formatio.shutdown()\n"
+        "formatio_otel.capture_exception(ValueError('x'))\n"
+        "assert formatio_otel.flush() is False\n"
+        "formatio_otel.shutdown()\n"
         "print('ok')\n",
         clean_env(**env),
     )
@@ -119,10 +119,10 @@ def test_init_unconfigured_warns_once_and_is_a_noop(env, warning):
 
 def test_init_never_raises():
     result = run_python(
-        "import formatio, formatio._sdk as sdk\n"
+        "import formatio_otel, formatio_otel._sdk as sdk\n"
         "def boom(*a, **k): raise RuntimeError('broken')\n"
         "sdk._start = boom\n"
-        "formatio.init(endpoint='http://127.0.0.1:9', token='t')\n"
+        "formatio_otel.init(endpoint='http://127.0.0.1:9', token='t')\n"
         "print('ok')\n",
         clean_env(),
     )

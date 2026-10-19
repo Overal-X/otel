@@ -6,9 +6,9 @@ from importlib.metadata import entry_points
 
 from opentelemetry.instrumentation.dependencies import get_dist_dependency_conflicts
 
-from formatio.config import is_curated
+from formatio_otel.config import is_curated
 
-logger = logging.getLogger("formatio")
+logger = logging.getLogger("formatio_otel")
 
 
 def instrument_installed(disabled: Collection[str] = ()) -> list[str]:
