@@ -1,5 +1,5 @@
 [project]
-name = "formatio"
+name = "formatio-otel"
 dynamic = ["version"]
 description = "Tracing and error tracking for Formatio: a thin OpenTelemetry distribution"
 readme = "README.md"

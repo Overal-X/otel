@@ -297,7 +297,7 @@ wheels = [
 ]
 
 [[package]]
-name = "formatio"
+name = "formatio-otel"
 source = { editable = "." }
 dependencies = [
     { name = "opentelemetry-api" },

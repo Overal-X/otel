@@ -9,7 +9,7 @@ every trace and error group working.
 | --- | --- |
 | `go/` | `github.com/overal-x/otel/go` |
 | `node/` | `@formatio/otel-node`, `@formatio/otel-next` |
-| `python/` | `formatio` |
+| `python/` | `formatio-otel` (imports as `formatio`) |
 
 On Formatio, turn **Tracing** on for the application; the endpoint and token are injected.
 Elsewhere, set `FORMATIO_ENDPOINT` (the public endpoint on the Tracing card) and

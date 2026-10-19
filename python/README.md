@@ -1,12 +1,14 @@
-# formatio
+# formatio-otel
 
 Tracing and error tracking for Python apps on [Formatio](https://formatio.cloud). A thin
 distribution of the OpenTelemetry SDK: it exports standard OTLP traces, so swapping it for plain
 OpenTelemetry keeps every trace and error group.
 
 ```sh
-pip install formatio
+pip install formatio-otel
 ```
+
+The package installs as `formatio-otel` and imports as `formatio`.
 
 ```python
 import formatio
