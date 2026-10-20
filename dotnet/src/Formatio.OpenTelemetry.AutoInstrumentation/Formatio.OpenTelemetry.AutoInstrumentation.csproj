@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.1.0</Version>
+    <Description>Formatio plugin for OpenTelemetry .NET automatic instrumentation</Description>
+    <!-- Byte-for-byte reproducible, so Formatio can pin the published DLL's checksum. -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- The automatic instrumentation bundle loads these at runtime, at exactly these versions (its
+       v1.17.0 release); the plugin is built against them and ships none of them. -->
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry.AutoInstrumentation.PluginApi" Version="1.17.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Formatio.OpenTelemetry.AutoInstrumentation.Tests" />
+  </ItemGroup>
+
+</Project>
