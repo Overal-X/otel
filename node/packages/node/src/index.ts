@@ -16,6 +16,16 @@ const MISSING_HINTS = {
   token: "no token configured (an authorization header in OTEL_EXPORTER_OTLP_HEADERS)",
 } as const;
 
+interface Pipeline {
+  flush(timeoutMs: number): Promise<boolean>;
+  shutdown(): Promise<void>;
+}
+
+// Formatio's build preloads its own copy of this package; an application that also depends on it
+// gets a second copy, whose init must use the running pipeline rather than start another.
+const PIPELINE = Symbol.for("@formatio/otel-node/pipeline");
+const shared = globalThis as { [PIPELINE]?: Pipeline };
+
 let initialized = false;
 let uninstallCrashHandlers: (() => void) | undefined;
 
@@ -30,6 +40,8 @@ export function init(options: InitOptions = {}): void {
     return;
   }
   initialized = true;
+  if (shared[PIPELINE]) return;
+  shared[PIPELINE] = own;
   try {
     const resolution = resolveConfig(options, process.env);
     if ("missing" in resolution) {
@@ -51,12 +63,19 @@ export function init(options: InitOptions = {}): void {
 
 /** Exports pending spans. Resolves false if that did not finish within `timeoutMs`. */
 export function flush(timeoutMs = DEFAULT_FLUSH_TIMEOUT_MS): Promise<boolean> {
-  return isTracing() ? flushTracing(timeoutMs) : Promise.resolve(true);
+  return (shared[PIPELINE] ?? own).flush(timeoutMs);
 }
 
 /** Flushes, stops tracing and removes the crash handlers, restoring Node's own. */
-export async function shutdown(): Promise<void> {
-  uninstallCrashHandlers?.();
-  uninstallCrashHandlers = undefined;
-  await shutdownTracing();
+export function shutdown(): Promise<void> {
+  return (shared[PIPELINE] ?? own).shutdown();
 }
+
+const own: Pipeline = {
+  flush: (timeoutMs) => (isTracing() ? flushTracing(timeoutMs) : Promise.resolve(true)),
+  async shutdown() {
+    uninstallCrashHandlers?.();
+    uninstallCrashHandlers = undefined;
+    await shutdownTracing();
+  },
+};
