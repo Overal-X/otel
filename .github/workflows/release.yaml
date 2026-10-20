@@ -1,0 +1,92 @@
+name: Release
+
+# A <language>/v<version> tag builds, tests and releases that language's package. Packages are
+# installed from the release's files rather than a registry; Go needs no release, its module
+# resolves from the go/v<version> tag.
+on:
+  push:
+    tags:
+      - "node/v*"
+      - "python/v*"
+      - "java/v*"
+      - "dotnet/v*"
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  node:
+    if: startsWith(github.ref_name, 'node/')
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: node
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: node/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Pack
+        run: |
+          version=${GITHUB_REF_NAME#node/v}
+          # Installed from a URL, @formatio/otel-next could not find @formatio/otel-node in a
+          # registry, so it depends on the copy released alongside it.
+          npm pkg set -w packages/next "dependencies.@formatio/otel-node=https://github.com/${GITHUB_REPOSITORY,,}/releases/download/$GITHUB_REF_NAME/formatio-otel-node-$version.tgz"
+          npm pack -w packages/node -w packages/next --pack-destination "$RUNNER_TEMP"
+      - run: ../.github/release.sh "$(node -p 'require("./packages/node/package.json").version')" "$RUNNER_TEMP"/*.tgz
+
+  python:
+    if: startsWith(github.ref_name, 'python/')
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: python
+    env:
+      # Managed builds carry the headers uWSGI, a test dependency, compiles against.
+      UV_PYTHON: "3.12"
+      UV_PYTHON_PREFERENCE: only-managed
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: uv sync --locked
+      - run: uv run pytest
+      - run: uv build --out-dir "$RUNNER_TEMP/dist"
+      - run: ../.github/release.sh "$(sed -n 's/^__version__ = "\(.*\)"/\1/p' src/formatio_otel/version.py)" "$RUNNER_TEMP"/dist/*
+
+  java:
+    if: startsWith(github.ref_name, 'java/')
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: java
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+      - run: ./mvnw -B verify
+      - run: ../.github/release.sh "$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout)" target/formatio-otel-javaagent-extension.jar
+
+  dotnet:
+    if: startsWith(github.ref_name, 'dotnet/')
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: dotnet
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test test/Formatio.OpenTelemetry.AutoInstrumentation.Tests
+      - run: dotnet build -c Release src/Formatio.OpenTelemetry.AutoInstrumentation -o .publish
+      - run: ../.github/release.sh "$(grep -o -m1 '<Version>[^<]*' src/Formatio.OpenTelemetry.AutoInstrumentation/*.csproj | cut -d'>' -f2)" .publish/Formatio.OpenTelemetry.AutoInstrumentation.dll

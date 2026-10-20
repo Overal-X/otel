@@ -3,8 +3,11 @@
 Tracing and error tracking for Next.js 15+ apps on [Formatio](https://formatio.cloud), built on
 [`@formatio/otel-node`](../node).
 
+Releases are on [GitHub](https://github.com/overal-x/otel/releases), not the npm registry. Installing the tarball by its URL also
+installs the `@formatio/otel-node` released with it:
+
 ```sh
-npm i @formatio/otel-next
+npm i https://github.com/overal-x/otel/releases/download/node/v0.1.0/formatio-otel-next-0.1.0.tgz
 ```
 
 ## Setup

@@ -4,9 +4,14 @@ Tracing and error tracking for Python apps on [Formatio](https://formatio.cloud)
 distribution of the OpenTelemetry SDK: it exports standard OTLP traces, so swapping it for plain
 OpenTelemetry keeps every trace and error group.
 
+Releases are on [GitHub](https://github.com/overal-x/otel/releases), not PyPI. Install the wheel by its URL:
+
 ```sh
-pip install formatio-otel
+pip install https://github.com/overal-x/otel/releases/download/python/v0.1.0/formatio_otel-0.1.0-py3-none-any.whl
 ```
+
+In `requirements.txt` or `pyproject.toml`'s dependencies, name it with the URL:
+`formatio-otel @ https://github.com/overal-x/otel/releases/download/python/v0.1.0/formatio_otel-0.1.0-py3-none-any.whl`.
 
 The package installs as `formatio-otel` and imports as `formatio_otel`.
 

@@ -3,8 +3,11 @@
 Tracing and error tracking for Node.js apps on [Formatio](https://formatio.cloud). A thin
 distribution of the OpenTelemetry Node SDK: it emits standard OTLP traces, nothing else.
 
+Releases are on [GitHub](https://github.com/overal-x/otel/releases), not the npm registry. Install the tarball by its URL; the
+`@formatio/otel-node` name and imports are the same:
+
 ```sh
-npm i @formatio/otel-node
+npm i https://github.com/overal-x/otel/releases/download/node/v0.1.0/formatio-otel-node-0.1.0.tgz
 ```
 
 ## Setup

@@ -24,3 +24,12 @@ Elsewhere, set the standard OTLP variables from the Tracing card; the SDKs read 
 export OTEL_EXPORTER_OTLP_ENDPOINT='https://your-formatio-host/otlp'
 export OTEL_EXPORTER_OTLP_HEADERS='authorization=Bearer <tracing token>'
 ```
+
+## Releases
+
+Packages are installed from [GitHub releases](https://github.com/overal-x/otel/releases) rather than npm or PyPI; each package's
+README has the install line. Pushing a `<language>/v<version>` tag (`node`, `python`, `java`,
+`dotnet`) runs [`release.yaml`](.github/workflows/release.yaml), which tests, builds and
+releases that language, failing if the tag and the package's version differ. The release notes
+and `SHA256SUMS` give each file's checksum, which Formatio pins for the files its Railpack builds
+download. The Go module needs only its `go/v<version>` tag.
